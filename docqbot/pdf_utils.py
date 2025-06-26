@@ -5,7 +5,6 @@ def extract_text_from_pdf(pdf_path):
     return "\n".join([page.get_text() for page in doc])
 
 def chunk_text(text, max_tokens=500):
-    import textwrap
     paragraphs = text.split("\n")
     chunks = []
     current_chunk = ""
