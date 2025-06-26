@@ -1,8 +1,7 @@
-streamlit
-PyMuPDF
-chromadb
-transformers
-sentence-transformers
-ollama
+streamlit==1.46.1
+PyMuPDF==1.26.1
+chromadb==1.0.13
+transformers==4.53.0
+sentence-transformers==4.1.0
+ollama==0.5.1
 protobuf==3.20.3
-
