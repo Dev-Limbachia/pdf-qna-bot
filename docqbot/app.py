@@ -1,10 +1,6 @@
-try:
-    import sys
-    import pysqlite3
-    sys.modules["sqlite3"] = pysqlite3
-except ImportError:
-    # Ignore if pysqlite3 isn't installed locally
-    pass
+import sys
+import pysqlite3
+sys.modules["sqlite3"] = pysqlite3
 
 
 import streamlit as st
