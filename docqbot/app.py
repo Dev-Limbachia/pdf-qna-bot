@@ -1,4 +1,9 @@
 import streamlit as st
+import sqlite3
+
+st.write(f"SQLite version: {sqlite3.sqlite_version}")
+
+import streamlit as st
 from pdf_utils import extract_text_from_pdf, chunk_text
 from embed_utils import embed_chunks
 from chroma_utils import store_and_query_chunks
