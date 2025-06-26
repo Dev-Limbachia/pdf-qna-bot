@@ -1,7 +1,11 @@
-import streamlit as st
-import sqlite3
+try:
+    import sys
+    import pysqlite3
+    sys.modules["sqlite3"] = pysqlite3
+except ImportError:
+    # Ignore if pysqlite3 isn't installed locally
+    pass
 
-st.write(f"SQLite version: {sqlite3.sqlite_version}")
 
 import streamlit as st
 from pdf_utils import extract_text_from_pdf, chunk_text
