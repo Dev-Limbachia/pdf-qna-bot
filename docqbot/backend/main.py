@@ -9,52 +9,75 @@ from backend.chroma_utils import store_and_query_chunks
 from backend.llm import query_local_llm
 
 # Path to frontend directory
-FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
+FRONTEND_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "frontend"
+)
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
 
-@app.route('/favicon.ico')
+
+@app.route("/favicon.ico")
 def favicon():
-    return '', 204
+    return "", 204
 
-@app.route('/')
+
+@app.route("/")
 def serve_index():
-    return send_from_directory(FRONTEND_DIR, 'index.html')
+    return send_from_directory(FRONTEND_DIR, "index.html")
 
-@app.route('/<path:path>')
+
+@app.route("/<path:path>")
 def serve_static(path):
     return send_from_directory(FRONTEND_DIR, path)
 
-@app.route('/ask', methods=['POST'])
+
+@app.route("/ask", methods=["POST"])
 def ask_question():
-    if "pdf" not in request.files or "question" not in request.form:
-        return jsonify({"error": "Missing file or question"}), 400
+    try:
+        print("📥 /ask endpoint hit")
 
-    pdf_file = request.files["pdf"]
-    question = request.form["question"]
+        if "pdf" not in request.files or "question" not in request.form:
+            print("❌ Missing PDF or question")
+            return jsonify({"error": "Missing file or question"}), 400
 
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        tmp_file.write(pdf_file.read())
-        pdf_path = tmp_file.name
+        pdf_file = request.files["pdf"]
+        question = request.form["question"]
+        print(f"Question: {question}")
 
-    full_text = extract_text_from_pdf(pdf_path)
-    chunks = chunk_text(full_text)
-    embeddings = embed_chunks(chunks)
-    top_chunks = store_and_query_chunks(chunks, embeddings, question)
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(pdf_file.read())
+            pdf_path = tmp_file.name
 
-    context = "\n\n".join(top_chunks)
-    prompt = f"""
-You are an AI assistant answering questions based on the following context:
+        print("📄 Extracting PDF text...")
+        full_text = extract_text_from_pdf(pdf_path)
+        print("🧩 Chunking text...")
+        chunks = chunk_text(full_text)
+        print("🔍 Embedding chunks...")
+        embeddings = embed_chunks(chunks)
+        print("📚 Querying top chunks...")
+        top_chunks = store_and_query_chunks(chunks, embeddings, question)
+
+        context = "\n\n".join(top_chunks)
+        prompt = f"""You are an AI assistant answering questions based on the following context:
 ---
 {context}
 ---
 Question: {question}
-Answer:
-"""
+Answer:"""
 
-    answer = query_local_llm(prompt)
-    return jsonify({"answer": answer})
+        print("🧠 Calling LLM...")
+        answer = query_local_llm(prompt)
+
+        print("✅ Answer ready")
+        return jsonify({"answer": answer})
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        return jsonify({"error": "Server error", "details": str(e)}), 500
+
 
 # For local development
 if __name__ == "__main__":
