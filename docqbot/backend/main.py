@@ -1,12 +1,15 @@
 import os
-import webbrowser
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import tempfile
-from .pdf_utils import extract_text_from_pdf, chunk_text
-from .embed_utils import embed_chunks
-from .chroma_utils import store_and_query_chunks
-from .llm import query_local_llm
+from pdf_utils import extract_text_from_pdf, chunk_text
+from embed_utils import embed_chunks
+from chroma_utils import store_and_query_chunks
+from llm import query_local_llm
+
+# Optional: Load .env variables locally (has no effect on Render)
+from dotenv import load_dotenv
+load_dotenv()
 
 # Path to frontend directory
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
@@ -52,14 +55,7 @@ Answer:
     answer = query_local_llm(prompt)
     return jsonify({"answer": answer})
 
+
 if __name__ == "__main__":
-    # Launch browser automatically
-    port = 5000
-    url = f"http://localhost:{port}/"
-    
-    # Only open browser if NOT reloader process (when Flask debug reloads)
-    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
-        import webbrowser
-        webbrowser.open_new(url)
-    
-    app.run(debug=True, port=port)
+    port = int(os.environ.get("PORT", 5000))  # PORT from Render or default 5000 locally
+    app.run(debug=True, host="0.0.0.0", port=port)
