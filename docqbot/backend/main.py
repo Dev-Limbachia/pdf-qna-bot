@@ -1,4 +1,6 @@
-from flask import Flask, request, jsonify
+import os
+import webbrowser
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import tempfile
 from pdf_utils import extract_text_from_pdf, chunk_text
@@ -6,10 +8,21 @@ from embed_utils import embed_chunks
 from chroma_utils import store_and_query_chunks
 from llm import query_local_llm
 
-app = Flask(__name__)
+# Path to frontend directory
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
+
+app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
 
-@app.route("/ask", methods=["POST"])
+@app.route('/')
+def serve_index():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory(FRONTEND_DIR, path)
+
+@app.route('/ask', methods=['POST'])
 def ask_question():
     if "pdf" not in request.files or "question" not in request.form:
         return jsonify({"error": "Missing file or question"}), 400
@@ -40,4 +53,8 @@ Answer:
     return jsonify({"answer": answer})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Launch browser automatically
+    port = 5000
+    url = f"http://localhost:{port}/"
+    webbrowser.open_new(url)
+    app.run(debug=True, port=port)
