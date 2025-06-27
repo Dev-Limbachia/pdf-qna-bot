@@ -1,21 +1,22 @@
 import os
+import webbrowser
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import tempfile
-from backend.pdf_utils import extract_text_from_pdf, chunk_text
-from backend.embed_utils import embed_chunks
-from backend.chroma_utils import store_and_query_chunks
-from backend.llm import query_local_llm
-
-# Optional: Load .env variables locally (has no effect on Render)
-from dotenv import load_dotenv
-load_dotenv()
+from pdf_utils import extract_text_from_pdf, chunk_text
+from embed_utils import embed_chunks
+from chroma_utils import store_and_query_chunks
+from llm import query_local_llm
 
 # Path to frontend directory
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
 
 @app.route('/')
 def serve_index():
@@ -55,7 +56,7 @@ Answer:
     answer = query_local_llm(prompt)
     return jsonify({"answer": answer})
 
-
+# For local development
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # PORT from Render or default 5000 locally
+    port = int(os.environ.get("PORT", 5000))  # Render uses PORT env
     app.run(debug=True, host="0.0.0.0", port=port)

@@ -20,7 +20,9 @@ function App() {
     setAnswer("");
 
     try {
-      const API_BASE = "https://pdf-qna-bot.onrender.com";
+      const API_BASE = window.location.hostname.includes("localhost")
+        ? "http://localhost:5000"
+        : "https://pdf-qna-bot.onrender.com";
 
       const res = await fetch(`${API_BASE}/ask`, {
         method: "POST",
