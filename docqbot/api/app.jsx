@@ -20,7 +20,11 @@ function App() {
     setAnswer("");
 
     try {
-      const res = await fetch("http://localhost:5000/ask", {
+      const API_BASE = window.location.hostname.includes("localhost")
+        ? "http://localhost:5000"
+        : "https://pdf-qna-bot.onrender.com";
+
+      const res = await fetch(`${API_BASE}/ask`, {
         method: "POST",
         body: formData,
       });
@@ -45,7 +49,8 @@ function App() {
         accept="application/pdf"
         onChange={(e) => setPdfFile(e.target.files[0])}
       />
-      <br /><br />
+      <br />
+      <br />
 
       <input
         type="text"
@@ -54,7 +59,8 @@ function App() {
         onChange={(e) => setQuestion(e.target.value)}
         style={{ width: "100%", padding: "0.5rem" }}
       />
-      <br /><br />
+      <br />
+      <br />
 
       <button onClick={handleSubmit} disabled={loading}>
         {loading ? "Thinking..." : "Ask"}
