@@ -3,10 +3,10 @@ import webbrowser
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import tempfile
-from pdf_utils import extract_text_from_pdf, chunk_text
-from embed_utils import embed_chunks
-from chroma_utils import store_and_query_chunks
-from llm import query_local_llm
+from backend.pdf_utils import extract_text_from_pdf, chunk_text
+from backend.embed_utils import embed_chunks
+from backend.chroma_utils import store_and_query_chunks
+from backend.llm import query_local_llm
 
 # Path to frontend directory
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
