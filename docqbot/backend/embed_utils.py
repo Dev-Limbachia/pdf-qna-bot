@@ -1,7 +1,11 @@
 # embed_utils.py
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+_model = None
 
 def embed_chunks(chunks):
-    return model.encode(chunks, convert_to_numpy=True).tolist()
+    global _model
+    if _model is None:
+        print("🔄 Loading embedding model...")
+        _model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+    return _model.encode(chunks, convert_to_numpy=True).tolist()

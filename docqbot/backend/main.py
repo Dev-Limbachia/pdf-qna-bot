@@ -1,5 +1,6 @@
 import os
 import webbrowser
+import gc
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import tempfile
@@ -8,10 +9,7 @@ from backend.embed_utils import embed_chunks
 from backend.chroma_utils import store_and_query_chunks
 from backend.llm import query_local_llm
 
-# Path to frontend directory
-FRONTEND_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "frontend"
-)
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
@@ -51,10 +49,15 @@ def ask_question():
 
         print("📄 Extracting PDF text...")
         full_text = extract_text_from_pdf(pdf_path)
+
         print("🧩 Chunking text...")
         chunks = chunk_text(full_text)
+        chunks = chunks[:20]  # Limit number of chunks for memory
+
         print("🔍 Embedding chunks...")
         embeddings = embed_chunks(chunks)
+        gc.collect()  # Clear unused memory
+
         print("📚 Querying top chunks...")
         top_chunks = store_and_query_chunks(chunks, embeddings, question)
 
@@ -74,13 +77,11 @@ Answer:"""
 
     except Exception as e:
         import traceback
-
         traceback.print_exc()
         return jsonify({"error": "Server error", "details": str(e)}), 500
 
 
 # For local development
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Render sets PORT
+    port = int(os.environ.get("PORT", 10000))  # Render uses PORT env
     app.run(host="0.0.0.0", port=port)
-
