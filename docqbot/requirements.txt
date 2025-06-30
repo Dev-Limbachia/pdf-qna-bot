@@ -6,3 +6,4 @@ transformers==4.53.0
 sentence-transformers==4.1.0
 gunicorn
 openai
+psutil
